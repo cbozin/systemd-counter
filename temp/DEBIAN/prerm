@@ -1,0 +1,8 @@
+#!/bin/sh
+
+echo "stopping counter service"
+sudo service counter stop
+
+
+
+

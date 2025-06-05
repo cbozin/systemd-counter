@@ -1,0 +1,9 @@
+Package: counter
+Version: 2.0.0
+Depends: python3, make
+Section: utils
+Priority: optional
+Architecture: all
+Maintainer: Carolyn <cbozin@zagmail.gonzaga.edu>
+Description: This is an application to package, build, and test a systemd counter service
+

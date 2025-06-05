@@ -1,0 +1,89 @@
+name: Counter Build Test Self Hosted
+run-name: ${{ github.actor }} is testing the counter service
+on: [push]
+jobs:
+  Build:
+    runs-on: [self-hosted, linux, CPSC334]
+    container: ubuntu:latest
+    timeout-minutes: 2
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: echo "The ${{ github.repository }} repository has been cloned to the runner."
+      - name: Install make
+        run: apt-get update && apt-get install make
+      - run: echo "The workflow is now ready to test your code on the runner." 
+      - name: Build project
+        run: |
+          echo "Building project..."
+          make build
+      - run: echo "This job's status is ${{ job.status }}."
+  Test:
+    runs-on: [self-hosted, linux, CPSC334]
+    container: ubuntu:latest
+    timeout-minutes: 2
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Set up python
+        uses: actions/setup-python@v4
+      # - name: Install venv
+      #   run: apt install -y venv
+      # - name: Create virtual environment
+      #   run: python3 -m venv myenv
+      - name: Activate virtual env
+        run: |      
+          echo python3 --version
+          apt-get install python3-pip
+          python -m pip install --upgrade pip
+          pip install pytest
+      - name: Install make
+        run: apt-get update && apt-get install make
+      - name:  Start service
+        run: |  
+          sh install.sh
+          sh build_deb.sh
+           dpkg -i counter-v2.0.0.deb
+      - name: Test project
+        run:
+          echo "Testing project..."
+          make test
+      - run: echo "This job's status is ${{ job.status }}."
+  Build-Deb-Pkg:
+    runs-on: [self-hosted, linux, CPSC334]
+    container: ubuntu:latest
+    timeout-minutes: 2
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Install make
+        run:  apt-get update &&  apt-get install make
+      - name: Build Debian package
+        run: |
+          echo "Building debian package..."
+          make build-deb
+      - name: Saving package as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deb-pkg
+          path: counter-v2.0.0.deb
+      - run: echo "This job's status is ${{ job.status }}."
+  Lint:
+    needs: Build-Deb-Pkg
+    runs-on: [self-hosted, linux, CPSC334]
+    container: ubuntu:latest
+    timeout-minutes: 2
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Install make
+        run: apt-get update && apt-get install make
+      - name: Download debian package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: deb-pkg
+      - name: Lint Debian Package
+        run: |
+          echo "Linting debian package..."
+          make lint-deb
+      - run: echo "This job's status is ${{ job.status }}."

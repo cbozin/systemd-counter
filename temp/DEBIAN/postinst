@@ -1,0 +1,13 @@
+#!/bin/sh
+
+echo "enabling counter service"
+sudo systemctl enable counter.service
+
+echo "creating counter user"
+sudo adduser counter --system
+
+echo "starting counter service"
+sudo systemctl daemon-reload
+sudo systemctl start counter
+
+echo "done"

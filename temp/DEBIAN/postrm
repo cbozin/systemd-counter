@@ -1,0 +1,13 @@
+#!/bin/sh
+
+echo "disabling counter service"
+sudo systemctl disable counter.service
+sudo systemctl daemon-reload  
+
+echo "deleting counter user"
+sudo userdel counter -f
+
+echo "removing temp file"
+sudo rm -f /tmp/currentCount.out
+
+

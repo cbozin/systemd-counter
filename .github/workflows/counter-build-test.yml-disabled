@@ -1,0 +1,71 @@
+name: Counter Build Test
+run-name: ${{ github.actor }} is testing the counter service
+on: [push]
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: echo "The ${{ github.repository }} repository has been cloned to the runner."
+      - run: echo "The workflow is now ready to test your code on the runner."
+      - name: Build project
+        run: |
+          echo "Building project..."
+          make build
+      - run: echo "This job's status is ${{ job.status }}."
+  Test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Set up python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.12.0
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Install pytest
+        run: pip install pytest
+      - name:  Start service
+        run: |  
+          sh install.sh
+          sh build_deb.sh
+          sudo dpkg -i counter-v2.0.0.deb
+      - name: Test project
+        run: |
+          echo "Testing project..."
+          make test
+      - run: echo "This job's status is ${{ job.status }}."
+  Build-Deb-Pkg:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Build Debian package
+        run: |
+          echo "Building debian package..."
+          make build-deb
+      - name: Saving package as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deb-pkg
+          path: counter-v2.0.0.deb
+      - run: echo "This job's status is ${{ job.status }}."
+  Lint:
+    needs: Build-Deb-Pkg
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Download debian package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: deb-pkg
+      - name: Lint Debian Package
+        run: |
+          echo "Linting debian package..."
+          make lint-deb
+      - run: echo "This job's status is ${{ job.status }}."
