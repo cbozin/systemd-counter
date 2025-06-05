@@ -6,7 +6,7 @@ This project implements a basic Linux daemon that counts seconds and logs output
 
 ## Project Overview
 
-I developed a service in **[insert language, e.g., Python 3]** that:
+I developed a service in Python3 that:
 
 - Writes the current date, time, and a counter value to `/tmp/currentCount.out` every second  
 - Handles the `SIGTERM` signal gracefully by writing a shutdown message and exiting cleanly  
